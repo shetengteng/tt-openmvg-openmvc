@@ -233,10 +233,10 @@ docker run --rm \
 mkdir my-reconstruction
 cd my-reconstruction
 
-# 2. 创建 Dockerfile 和 pipeline.sh（复制前面的代码）
+# 2. 创建 Dockerfile 和 pipeline.sh
 
 # 3. 构建镜像
-docker build -t my-3d .
+docker build -t tt-openmvg-openmvs .
 
 # 4. 准备照片
 mkdir images output
@@ -246,7 +246,7 @@ mkdir images output
 docker run --rm \
     -v $(pwd)/images:/workspace/images \
     -v $(pwd)/output:/workspace/output \
-    my-3d \
+    tt-openmvg-openmvs \
     pipeline.sh /workspace/images /workspace/output
 
 # 6. 查看结果

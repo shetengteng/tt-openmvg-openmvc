@@ -1,0 +1,96 @@
+# OpenMVS v2.3.0 独立镜像
+FROM ubuntu:22.04
+
+# 设置时区和非交互模式
+ENV DEBIAN_FRONTEND=noninteractive
+ENV TZ=Asia/Shanghai
+
+# Add OpenMVS binaries to path
+ENV PATH=$PATH:/opt/bin
+
+# Get OpenMVS dependencies (包含 libeigen3-dev)
+RUN apt-get update && apt-get install -y tzdata && \
+    apt-get install -y \
+    cmake \
+    build-essential \
+    git \
+    ca-certificates \
+    libeigen3-dev \
+    libboost-iostreams-dev \
+    libboost-program-options-dev \
+    libboost-system-dev \
+    libboost-serialization-dev \
+    libboost-filesystem-dev \
+    libboost-graph-dev \
+    libboost-regex-dev \
+    libboost-test-dev \
+    libcgal-dev \
+    libcgal-qt5-dev \
+    freeglut3-dev \
+    libglew-dev \
+    libglfw3-dev \
+    libsuitesparse-dev \
+    libfreeimage-dev \
+    libgoogle-glog-dev \
+    libgflags-dev \
+    qtbase5-dev \
+    libqt5opengl5-dev \
+    libopencv-dev \
+    libsqlite3-dev \
+    libmetis-dev \
+    libceres-dev \
+    python3 \
+    python3-pip && \
+    apt-get autoclean && apt-get clean
+
+# 更新 CA 证书
+RUN update-ca-certificates
+
+# 检查 Eigen 版本 (Ubuntu 22.04 自带的可能不够新)
+RUN pkg-config --modversion eigen3 || echo "Eigen3 not found via pkg-config"
+
+# 如果系统版本不够，手动安装 Eigen 3.4.0
+RUN EIGEN_VERSION=$(pkg-config --modversion eigen3 2>/dev/null | cut -d. -f1-2 || echo "0.0") && \
+    if [ "$(echo "$EIGEN_VERSION 3.4" | awk '{print ($1 < $2)}')" = "1" ]; then \
+    echo "Installing newer Eigen version..." && \
+    wget -O /tmp/eigen-3.4.0.tar.gz https://gitlab.com/libeigen/eigen/-/archive/3.4.0/eigen-3.4.0.tar.gz && \
+    cd /tmp && tar -xzf eigen-3.4.0.tar.gz && \
+    mkdir eigen-3.4.0/build && cd eigen-3.4.0/build && \
+    cmake -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX="/usr/local" .. && \
+    make -j2 install && \
+    rm -rf /tmp/eigen-3.4.0* && \
+    echo "Eigen 3.4.0 installed to /usr/local"; \
+    else \
+    echo "System Eigen version $EIGEN_VERSION is sufficient"; \
+    fi
+
+# 安装VCGLib
+RUN git clone https://github.com/cdcseacave/VCG.git /opt/vcglib
+
+# 构建OpenMVS v2.3.0
+RUN git clone --recurse-submodules https://github.com/cdcseacave/openMVS.git --branch v2.3.0 /opt/openMVS && \
+    mkdir /opt/openMVS_build && cd /opt/openMVS_build && \
+    cmake -DCMAKE_BUILD_TYPE=Release \
+    -DVCG_ROOT=/opt/vcglib \
+    -DCMAKE_INSTALL_PREFIX="/opt" \
+    -DCMAKE_CXX_FLAGS="-O2" \
+    -DOpenMVS_USE_CUDA=OFF \
+    -DOpenMVS_USE_CERES=ON \
+    -DEIGEN3_INCLUDE_DIR=/usr/include/eigen3 \
+    -DEIGEN3_ROOT_DIR=/usr \
+    ../openMVS && \
+    make -j2 && make install && \
+    cp ../openMVS/scripts/python/MvgMvsPipeline.py /opt/bin/ && \
+    cd /opt && rm -rf openMVS_build openMVS
+
+# 清理构建文件
+RUN rm -rf /opt/vcglib && \
+    apt-get autoremove -y && \
+    apt-get autoclean && \
+    rm -rf /var/lib/apt/lists/*
+
+# 创建工作目录
+WORKDIR /workspace
+
+# 默认命令
+CMD ["/bin/bash"]
