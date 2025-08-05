@@ -1,0 +1,62 @@
+# OpenMVG v2.1 独立镜像
+FROM ubuntu:22.04
+
+# 设置时区和非交互模式
+ENV DEBIAN_FRONTEND=noninteractive
+ENV TZ=Asia/Shanghai
+
+# Add openMVG binaries to path
+ENV PATH=$PATH:/opt/openMVG_Build/install/bin
+
+# Get openMVG dependencies
+RUN apt-get update && apt-get install -y tzdata && \
+    apt-get install -y \
+    cmake \
+    build-essential \
+    graphviz \
+    git \
+    coinor-libclp-dev \
+    libceres-dev \
+    libflann-dev \
+    libjpeg-dev \
+    liblemon-dev \
+    libpng-dev \
+    libtiff-dev \
+    python3 \
+    python3-pip && \
+    apt-get autoclean && apt-get clean
+
+# Clone the openMVG repo (使用 2.1 版本)
+RUN git clone --recursive https://github.com/openMVG/openMVG.git --branch v2.1 /opt/openMVG && \
+    cd /opt/openMVG && git submodule update --init --recursive
+
+# Build openMVG
+RUN mkdir /opt/openMVG_Build && \
+    cd /opt/openMVG_Build && \
+    cmake -DCMAKE_BUILD_TYPE=RELEASE \
+    -DCMAKE_INSTALL_PREFIX="/opt/openMVG_Build/install" \
+    -DOpenMVG_BUILD_TESTS=OFF \
+    -DOpenMVG_BUILD_EXAMPLES=OFF \
+    -DOpenMVG_BUILD_SOFTWARES=ON \
+    -DCOINUTILS_INCLUDE_DIR_HINTS=/usr/include \
+    -DLEMON_INCLUDE_DIR_HINTS=/usr/include/lemon \
+    -DCLP_INCLUDE_DIR_HINTS=/usr/include \
+    -DOSI_INCLUDE_DIR_HINTS=/usr/include \
+    -DCMAKE_CXX_FLAGS="-O2" \
+    ../openMVG/src && \
+    make -j2 && make install
+
+# 复制传感器数据库文件
+RUN cp /opt/openMVG/src/openMVG/exif/sensor_width_database/sensor_width_camera_database.txt /opt/openMVG_Build/install/bin/
+
+# 清理构建文件
+RUN rm -rf /opt/openMVG && \
+    apt-get autoremove -y && \
+    apt-get autoclean && \
+    rm -rf /var/lib/apt/lists/*
+
+# 创建工作目录
+WORKDIR /workspace
+
+# 默认命令
+CMD ["/bin/bash"] 
