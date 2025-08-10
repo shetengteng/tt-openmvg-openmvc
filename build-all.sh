@@ -17,9 +17,6 @@ docker build  --platform linux/amd64 -f Dockerfile.openmvs -t openmvs:v2.3.0 .
 echo "📦 构建 COLMAP 镜像..."
 docker build --platform linux/amd64  -f Dockerfile.colmap -t colmap:latest .
 
-# 构建完整组合镜像
-echo "📦 构建完整组合镜像..."
-docker build  --platform linux/amd64 -f Dockerfile.combined -t photogrammetry:complete .
 
 echo "✅ 所有镜像构建完成！"
 

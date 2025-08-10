@@ -1,43 +1,22 @@
-🔍 Docker 平台架构详解
-
-## `--platform linux/amd64` 含义
-
-### 架构类型
-- **amd64 (x86_64)**: Intel/AMD 64位处理器架构
-- **arm64 (aarch64)**: ARM 64位处理器架构（如 Apple Silicon M1/M2）
-
-### 当前环境检测
-你的 Mac 是 Apple Silicon，默认使用 ARM64 架构。
-
-## 区别对比
-
-### ARM64 (当前默认)
-✅ **优势:**
-- 原生性能，速度更快
-- 电池消耗更低
-
-❌ **问题:**
-- Ubuntu ARM64 软件包仓库连接不稳定
-- 某些软件包可能不可用
-- 生态系统相对较新
-
-### AMD64 (x86_64) 模拟
-✅ **优势:**
-- 成熟的软件生态系统
-- Ubuntu x86_64 仓库稳定可靠
-- 更好的软件兼容性
-
-❌ **劣势:**
-- 需要模拟运行，性能稍慢
-- 镜像体积可能更大
-
-## 实际影响
-- **网络**: ARM64 连接 Ubuntu 仓库经常超时
-- **兼容性**: x86_64 软件包更全面
-- **性能**: 对于编译任务，差异不大
-
-## 建议
-使用 `--platform linux/amd64` 是最佳选择，稳定性更好。
-
-是否使用推荐的 x86_64 架构构建？
-开始测试构建
+sh run_openmvg.sh /Users/TerrellShe/Documents/personal/tt-projects/ImageDataset_SceauxCastle2
+-e [INFO 19:23:52] 开始OpenMVG处理流程...
+-e [INFO 19:23:52] 工作目录: /Users/TerrellShe/Documents/personal/tt-projects/ImageDataset_SceauxCastle2
+-e [INFO 19:23:52] Docker镜像: openmvg:v2.1
+-e [INFO 19:23:52] 检查运行前提条件...
+-e [SUCCESS 19:23:52] 前提条件检查通过 (发现       11 张图像)
+-e [INFO 19:23:52] 🔍 开始智能图像分析...
+-e [INFO 19:23:52] 📊 图像分析结果：
+-e [INFO 19:23:52]   - 图像数量:       11
+-e [INFO 19:23:52]   - 场景类型: 中等图像 (5-20张)
+-e [INFO 19:23:52] 🎯 应用中等数量图像优化参数：
+-e [INFO 19:23:52]   - 焦距: 1050
+-e [INFO 19:23:52]   - 相机模型: 3
+-e [INFO 19:23:52]   - 特征类型: SIFT
+-e [INFO 19:23:52]   - 匹配比率: 0.7
+-e [INFO 19:23:52]   - 三角化方法: 3
+-e [INFO 19:23:52]   - 内参优化: ADJUST_FOCAL_LENGTH
+-e [INFO 19:23:52] 🧹 预处理图像目录...
+-e [SUCCESS 19:23:52]   ✓ 预处理完成
+-e [INFO 19:23:52] 启动Docker容器并执行处理流程...
+-e [INFO 19:23:53] 验证处理结果...
+-e [ERROR 19:23:53] 图像列表 失败 - 缺少输出文件: output/matches/sfm_data.json
